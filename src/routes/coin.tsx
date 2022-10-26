@@ -6,6 +6,7 @@ import {
   useParams,
   useLocation,
 } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 // import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Chart from './Chart';
@@ -24,8 +25,19 @@ const Header = styled.header`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 `;
-
+const PrevBtn = styled.button`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 30px;
+  color: #fff;
+  background: transparent;
+  border: none;
+`;
 const Title = styled.h1`
   color: ${props => props.theme.accentColor};
   font-size: 36px;
@@ -64,10 +76,10 @@ const Tabs = styled.div`
 const Tab = styled.span<{ isActive: boolean }>`
   text-align: center;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 7px 0px;
+  padding: 12px 0px;
   border-radius: 10px;
   color: ${props =>
     props.isActive ? props.theme.accentColor : props.theme.textColor};
@@ -147,30 +159,23 @@ function Coin() {
   const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceData>(
     ['tickers', coinId],
     () => fetchCoinTickers(`${coinId}`),
+    {
+      refetchInterval: 5000,
+    },
   );
-
-  // const [loading, setLoading] = useState(true);
-  // const [info, setInfo] = useState<InfoData>();
-  // const [priceInfo, setPriceInfo] = useState<PriceData>();
-
-  // useEffect(() => {
-  //   (async () => {
-  //     const infoData = await (
-  //       await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-  //     ).json();
-  //     const priceData = await (
-  //       await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-  //     ).json();
-  //     setInfo(infoData);
-  //     setPriceInfo(priceData);
-  //     setLoading(false);
-  //   })();
-  // }, [coinId]);
   const loading = infoLoading || tickersLoading;
 
   return (
     <Container>
+      <Helmet>
+        <title>
+          {state?.name ? state.name : loading ? 'Loading...' : infoData?.name}
+        </title>
+      </Helmet>
       <Header>
+        <PrevBtn>
+          <Link to="/">&larr;</Link>
+        </PrevBtn>
         <Title>
           {state?.name ? state.name : loading ? 'Loading...' : infoData?.name}
         </Title>
@@ -189,8 +194,8 @@ function Coin() {
               <span>${infoData?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
-              <span>Open Source:</span>
-              <span>{infoData?.open_source ? 'Yes' : 'No'}</span>
+              <span>Price:</span>
+              <span>{tickersData?.quotes.USD.price.toFixed(3)}</span>
             </OverviewItem>
           </Overview>
           <Description>{infoData?.description}</Description>
@@ -198,6 +203,10 @@ function Coin() {
             <OverviewItem>
               <span>Total Suply:</span>
               <span>{tickersData?.total_supply}</span>
+            </OverviewItem>
+            <OverviewItem>
+              <span>MAX SUPPLY:</span>
+              <span>{tickersData?.max_supply}</span>
             </OverviewItem>
           </Overview>
 
@@ -212,7 +221,7 @@ function Coin() {
 
           <Routes>
             <Route path="chart" element={<Chart coinId={coinId as string} />} />
-            <Route path="price" element={<Price />} />
+            <Route path="price" element={<Price coinId={coinId as string} />} />
           </Routes>
         </>
       )}
