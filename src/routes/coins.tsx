@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 // import { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { fetchCoins } from '../api';
+import { useSetRecoilState } from 'recoil';
+import { isDarkAtom } from '../atoms';
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -15,6 +17,7 @@ const Header = styled.header`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 `;
 
 const Title = styled.h1`
@@ -26,7 +29,7 @@ const CoinList = styled.ul``;
 
 const Coin = styled.li`
   background-color: #fff;
-  color: ${props => props.theme.bgColor};
+  color: #000;
   margin-bottom: 10px;
   border-radius: 15px;
   a {
@@ -52,6 +55,17 @@ const CoinIcon = styled.img`
 const Loader = styled.p`
   text-align: center;
 `;
+const ThemeBtn = styled.button`
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: ${props => props.theme.textColor};
+  cursor: pointer;
+  font-size: 30px;
+`;
 
 interface ICoin {
   id: string;
@@ -64,6 +78,9 @@ interface ICoin {
 }
 
 function Coins() {
+  const setDarkAtom = useSetRecoilState(isDarkAtom);
+  const toggleDarkAtom = () => setDarkAtom(prev => !prev);
+
   const { isLoading, data } = useQuery<ICoin[]>(['allCoins'], fetchCoins);
 
   // const [coins, setCoins] = useState<ICoin[]>([]);
@@ -81,6 +98,7 @@ function Coins() {
     <Container>
       <Header>
         <Title>Coin List</Title>
+        <ThemeBtn onClick={toggleDarkAtom}>&#9786;</ThemeBtn>
       </Header>
       {isLoading ? (
         <Loader>Loading...</Loader>

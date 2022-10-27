@@ -34,7 +34,7 @@ const PrevBtn = styled.button`
   transform: translateY(-50%);
   cursor: pointer;
   font-size: 30px;
-  color: #fff;
+  color: ${props => props.theme.textColor};
   background: transparent;
   border: none;
 `;
